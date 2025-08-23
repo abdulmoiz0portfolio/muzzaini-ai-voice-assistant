@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Muzzaini AI - Voice Assistant</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            background: white;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 2.5em;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .button-container {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        #micBtn {
+            background: #007AFF;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+        
+        #micBtn:hover {
+            background: #005bb5;
+        }
+        
+        #muteBtn {
+            background: #666;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-left: 10px;
+            display: none;
+        }
+        
+        #muteBtn:hover {
+            background: #444;
+        }
+        
+        #statusEl {
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        #questionEl {
+            padding: 15px;
+            background: #e6f7ff;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            min-height: 60px;
+            display: none;
+        }
+        
+        #answerEl {
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 6px;
+            min-height: 80px;
+            display: none;
+        }
+        
+        #loadingEl {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px 0;
+            display: none;
+        }
+        
+        .spinner {
+            width: 30px;
+            height: 30px;
+            border: 3px solid #007AFF;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Muzzaini AI</h1>
+        <p style="text-align: center; color: #666; margin-bottom: 30px;">Your Intelligent Voice Assistant</p>
+        
+        <div class="button-container">
+            <button id="micBtn">🎤 Start Listening</button>
+            <button id="muteBtn">🔇 Mute</button>
+        </div>
+        
+        <div id="statusEl">Press microphone to ask a question</div>
+        
+        <div id="questionEl">
+            <strong>You:</strong> <span id="questionText"></span>
+        </div>
+        
+        <div id="answerEl">
+            <strong>Muzzaini AI:</strong> <span id="answerText"></span>
+        </div>
+        
+        <div id="loadingEl">
+            <div class="spinner"></div>
+            <span style="margin-left:10px; color:#666;">Thinking...</span>
+        </div>
+        
+        <div class="footer">
+            <p>Powered by Muzzaini AI Technology</p>
+        </div>
+    </div>
+
+    <script>
+        let isListening = false;
+        let isMuted = false;
+        let recognition;
+        let synthesis = window.speechSynthesis;
+        let currentUtterance = null;
+
+        const micBtn = document.getElementById('micBtn');
+        const muteBtn = document.getElementById('muteBtn');
+        const statusEl = document.getElementById('statusEl');
+        const questionEl = document.getElementById('questionEl');
+        const answerEl = document.getElementById('answerEl');
+        const loadingEl = document.getElementById('loadingEl');
+        const questionText = document.getElementById('questionText');
+        const answerText = document.getElementById('answerText');
+
+        // Initialize speech recognition
+        if ('webkitSpeechRecognition' in window) {
+            recognition = new webkitSpeechRecognition();
+        } else if ('SpeechRecognition' in window) {
+            recognition = new SpeechRecognition();
+        } else {
+            statusEl.textContent = "Speech recognition not supported in this browser";
+            micBtn.disabled = true;
+        }
+
+        if (recognition) {
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.lang = 'en-US';
+            
+            recognition.onresult = async (event) => {
+                const transcript = event.results[0][0].transcript;
+                questionText.textContent = transcript;
+                questionEl.style.display = 'block';
+                statusEl.textContent = 'You said: ' + transcript;
+                
+                // Generate and speak answer
+                loadingEl.style.display = 'flex';
+                statusEl.textContent = 'Generating answer...';
+                
+                try {
+                    const response = await generateText(transcript);
+                    answerText.textContent = response;
+                    answerEl.style.display = 'block';
+                    statusEl.textContent = 'Ready';
+                    
+                    if (!isMuted) {
+                        speak(response);
+                    }
+                } catch (error) {
+                    statusEl.textContent = 'Error: ' + error.message;
+                } finally {
+                    loadingEl.style.display = 'none';
+                }
+            };
+            
+            recognition.onerror = (event) => {
+                statusEl.textContent = 'Error: ' + event.error;
+                toggleListening();
+            };
+            
+            recognition.onend = () => {
+                if (isListening) toggleListening();
+            };
+        }
+
+        function toggleListening() {
+            if (!recognition) return;
+            
+            if (isListening) {
+                recognition.stop();
+                micBtn.textContent = '🎤 Start Listening';
+                micBtn.style.background = '#007AFF';
+            } else {
+                recognition.start();
+                micBtn.textContent = '⏹️ Stop Listening';
+                micBtn.style.background = '#d32f2f';
+                questionEl.style.display = 'none';
+                answerEl.style.display = 'none';
+                statusEl.textContent = 'Listening...';
+            }
+            isListening = !isListening;
+        }
+
+        function speak(text) {
+            if (currentUtterance) {
+                synthesis.cancel();
+            }
+            
+            currentUtterance = new SpeechSynthesisUtterance(text);
+            currentUtterance.onend = () => {
+                currentUtterance = null;
+            };
+            currentUtterance.onerror = () => {
+                currentUtterance = null;
+            };
+            
+            synthesis.speak(currentUtterance);
+        }
+
+        // Mock AI response function (replace with actual API call)
+        async function generateText(prompt) {
+            // Simulate API delay
+            await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
+            
+            // Mock responses based on common questions
+            const responses = {
+                'hello': 'Hello! I\'m Muzzaini AI, your voice assistant. How can I help you today?',
+                'how are you': 'I\'m doing great! Thank you for asking. I\'m here and ready to assist you.',
+                'what is your name': 'My name is Muzzaini AI. I\'m an intelligent voice assistant designed to help you.',
+                'what can you do': 'I can answer questions, have conversations, help with information, and much more! Just ask me anything.',
+                'weather': 'I\'m sorry, I don\'t have access to real-time weather data right now, but I\'d be happy to help with other questions!',
+                'time': 'I don\'t have access to the current time, but you can check your device\'s clock.',
+                'default': 'That\'s an interesting question! I\'m Muzzaini AI, and while I\'m still learning, I\'m here to help you as best I can. Could you tell me more about what you\'d like to know?'
+            };
+            
+            const lowerPrompt = prompt.toLowerCase();
+            for (const [key, response] of Object.entries(responses)) {
+                if (lowerPrompt.includes(key)) {
+                    return response;
+                }
+            }
+            
+            return responses.default;
+        }
+
+        micBtn.onclick = () => {
+            toggleListening();
+            muteBtn.style.display = 'inline-block';
+        };
+        
+        muteBtn.onclick = () => {
+            isMuted = !isMuted;
+            muteBtn.textContent = isMuted ? '🔈 Unmute' : '🔇 Mute';
+            
+            if (currentUtterance) {
+                synthesis.cancel();
+            }
+        };
+    </script>
+</body>
+</html>
+
