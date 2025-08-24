@@ -1,4 +1,3 @@
-/* Background + layout */
 body {
   margin: 0;
   padding: 0;
@@ -31,10 +30,9 @@ h1 {
   margin-bottom: 30px;
 }
 
-/* Buttons */
 .button-container {
-  margin-bottom: 20px;
   text-align: center;
+  margin-bottom: 20px;
 }
 
 #micBtn, #sendBtn {
@@ -68,7 +66,6 @@ h1 {
   background: #444;
 }
 
-/* Input */
 #textInput {
   padding: 10px;
   width: 70%;
@@ -76,37 +73,32 @@ h1 {
   border-radius: 6px;
 }
 
-/* Status and response boxes */
-#statusEl {
+#statusEl, #questionEl, #answerEl {
   padding: 10px;
-  background: #f0f0f0;
   border-radius: 6px;
   margin-bottom: 15px;
+}
+
+#statusEl {
+  background: #f0f0f0;
   text-align: center;
 }
 
 #questionEl {
-  padding: 15px;
   background: #e6f7ff;
-  border-radius: 6px;
-  margin-bottom: 15px;
   display: none;
 }
 
 #answerEl {
-  padding: 15px;
   background: #f9f9f9;
-  border-radius: 6px;
-  margin-bottom: 15px;
   display: none;
 }
 
 #loadingEl {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 20px 0;
   display: none;
+  justify-content: center;
+  align-items: center;
+  margin: 20px 0;
   color: #666;
 }
 
@@ -126,6 +118,6 @@ h1 {
 .footer {
   text-align: center;
   margin-top: 30px;
-  color: #666;
   font-size: 14px;
+  color: #666;
 }
