@@ -35,23 +35,19 @@ function sayHello() {
       speechSynthesis.speak(utterance);
     }
 
-    recognition.onresult = (event) => {
-      const userInput = event.results[0][0].transcript;
-      console.log("User said:", userInput);
-
-      // Process the input (replace this with your AI logic)
+     // Replace this with your AI logic or response generation
       const response = "You said: " + userInput;
 
-      speak(response);  // Speak the response and restart listening after done
+      speak(response);
     };
 
     recognition.onerror = (event) => {
       console.error("Speech recognition error:", event.error);
-      // Optionally restart listening on error
+      // Optionally restart recognition on error
       recognition.start();
     };
 
-    // Start listening when mic button is clicked
+    // Start recognition when mic button is clicked
     document.getElementById("micBtn").addEventListener("click", () => {
       recognition.start();
     });
