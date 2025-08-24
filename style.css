@@ -1,3 +1,4 @@
+/* Background + layout */
 body {
   margin: 0;
   padding: 0;
@@ -16,14 +17,12 @@ body {
 }
 
 h1 {
-  color: #333;
   margin-bottom: 20px;
   text-align: center;
   font-size: 2.5em;
   background: linear-gradient(45deg, #667eea, #764ba2);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
 
 .subtitle {
@@ -32,12 +31,13 @@ h1 {
   margin-bottom: 30px;
 }
 
+/* Buttons */
 .button-container {
   margin-bottom: 20px;
   text-align: center;
 }
 
-#micBtn {
+#micBtn, #sendBtn {
   background: #007AFF;
   color: white;
   border: none;
@@ -48,7 +48,7 @@ h1 {
   transition: background 0.3s;
 }
 
-#micBtn:hover {
+#micBtn:hover, #sendBtn:hover {
   background: #005bb5;
 }
 
@@ -68,6 +68,7 @@ h1 {
   background: #444;
 }
 
+/* Input */
 #textInput {
   padding: 10px;
   width: 70%;
@@ -75,21 +76,7 @@ h1 {
   border-radius: 6px;
 }
 
-#sendBtn {
-  padding: 10px 20px;
-  margin-left: 10px;
-  border: none;
-  border-radius: 6px;
-  background: #007AFF;
-  color: white;
-  cursor: pointer;
-  transition: background 0.3s;
-}
-
-#sendBtn:hover {
-  background: #005bb5;
-}
-
+/* Status and response boxes */
 #statusEl {
   padding: 10px;
   background: #f0f0f0;
@@ -103,9 +90,42 @@ h1 {
   background: #e6f7ff;
   border-radius: 6px;
   margin-bottom: 15px;
-  min-height: 60px;
   display: none;
 }
 
-#an
+#answerEl {
+  padding: 15px;
+  background: #f9f9f9;
+  border-radius: 6px;
+  margin-bottom: 15px;
+  display: none;
+}
 
+#loadingEl {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 20px 0;
+  display: none;
+  color: #666;
+}
+
+.spinner {
+  width: 30px;
+  height: 30px;
+  border: 3px solid #007AFF;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.footer {
+  text-align: center;
+  margin-top: 30px;
+  color: #666;
+  font-size: 14px;
+}
