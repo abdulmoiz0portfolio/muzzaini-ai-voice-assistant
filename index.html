@@ -1,33 +1,48 @@
-<div style="max-width:600px; margin:50px auto; padding:20px; border-radius:12px; box-shadow:0 4px 20px rgba(0,0,0,0.15); font-family:Arial,sans-serif;">
-  <h1 style="color:#333; margin-bottom:20px;">AI Voice Assistant</h1>
-  
-  <div style="margin-bottom:20px;">
-    <button id="micBtn" style="background:#007AFF; color:white; border:none; padding:12px 24px; border-radius:8px; cursor:pointer; font-size:16px; transition:background 0.3s;">
-      🎤 Start Listening
-    </button>
-    <button id="muteBtn" style="background:#666; color:white; border:none; padding:12px 24px; border-radius:8px; cursor:pointer; font-size:16px; margin-left:10px; display:none;">
-      🔇 Mute
-    </button>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Muzzaini AI - Voice Assistant</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Muzzaini AI</h1>
+    <p class="subtitle">Your Intelligent Voice Assistant</p>
+    
+    <div class="button-container">
+      <button id="micBtn">🎤 Start Listening</button>
+      <button id="muteBtn">🔇 Mute</button>
+    </div>
+
+    <!-- Text input -->
+    <div style="margin-bottom:15px; text-align:center;">
+      <input id="textInput" type="text" placeholder="Type your question...">
+      <button id="sendBtn">Send</button>
+    </div>
+    
+    <div id="statusEl">Press microphone or type a question</div>
+    
+    <div id="questionEl">
+      <strong>You:</strong> <span id="questionText"></span>
+    </div>
+    
+    <div id="answerEl">
+      <strong>Assistant:</strong> <span id="answerText"></span>
+    </div>
+    
+    <div id="loadingEl">
+      <div class="spinner"></div>
+      <span style="margin-left:10px; color:#666;">Thinking...</span>
+    </div>
+    
+    <div class="footer">
+      <p>Powered by Muzzaini AI Technology</p>
+    </div>
   </div>
 
-  <!-- NEW: Text input box -->
-  <div style="margin-bottom:15px; text-align:center;">
-    <input id="textInput" type="text" placeholder="Type your question..." style="padding:10px; width:70%; border:1px solid #ccc; border-radius:6px;">
-    <button id="sendBtn" style="padding:10px 20px; margin-left:10px; border:none; border-radius:6px; background:#007AFF; color:white; cursor:pointer;">Send</button>
-  </div>
-  
-  <div id="statusEl" style="padding:10px; background:#f0f0f0; border-radius:6px; margin-bottom:15px; text-align:center;">Press microphone or type a question</div>
-  
-  <div id="questionEl" style="padding:15px; background:#e6f7ff; border-radius:6px; margin-bottom:15px; min-height:60px; display:none;">
-    <strong>You:</strong> <span id="questionText"></span>
-  </div>
-  
-  <div id="answerEl" style="padding:15px; background:#f9f9f9; border-radius:6px; min-height:80px; display:none;">
-    <strong>Assistant:</strong> <span id="answerText"></span>
-  </div>
-  
-  <div id="loadingEl" style="display:flex; align-items:center; justify-content:center; margin:20px 0; display:none;">
-    <div style="width:30px; height:30px; border:3px solid #007AFF; border-top-color:transparent; border-radius:50%; animation:spin 1s linear infinite;"></div>
-    <span style="margin-left:10px; color:#666;">Thinking...</span>
-  </div>
-</div>
+  <!-- JavaScript -->
+  <script src="your-script.js"></script>
+</body>
+</html>
