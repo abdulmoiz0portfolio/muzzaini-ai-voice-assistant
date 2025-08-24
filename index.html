@@ -294,6 +294,27 @@
             }
         };
     </script>
+    <script>
+    if (!('speechSynthesis' in window)) {
+      alert("Speech synthesis not supported on this browser.");
+    }
+
+    const context = new (window.AudioContext || window.webkitAudioContext)();
+    document.addEventListener('click', () => {
+      if (context.state === 'suspended') {
+        context.resume();
+      }
+    });
+
+    function speak(text) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      speechSynthesis.speak(utterance);
+    }
+
+    document.getElementById("speakBtn").addEventListener("click", () => {
+      speak("Hello from AI assistant");
+    });
+  </script>
 </body>
 </html>
 
