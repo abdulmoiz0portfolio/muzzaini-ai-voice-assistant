@@ -4,110 +4,80 @@ let recognition;
 let synthesis = window.speechSynthesis;
 let currentUtterance = null;
 
-const micBtn = document.getElementById('micBtn');
-const muteBtn = document.getElementById('muteBtn');
-const statusEl = document.getElementById('statusEl');
-const questionEl = document.getElementById('questionEl');
-const answerEl = document.getElementById('answerEl');
-const loadingEl = document.getElementById('loadingEl');
-const questionText = document.getElementById('questionText');
-const answerText = document.getElementById('answerText');
-const textInput = document.getElementById('textInput');
-const sendBtn = document.getElementById('sendBtn');
+const micBtn = document.getElementById("micBtn");
+const muteBtn = document.getElementById("muteBtn");
+const statusEl = document.getElementById("statusEl");
+const questionEl = document.getElementById("questionEl");
+const answerEl = document.getElementById("answerEl");
+const loadingEl = document.getElementById("loadingEl");
+const questionText = document.getElementById("questionText");
+const answerText = document.getElementById("answerText");
+const textInput = document.getElementById("textInput");
+const sendBtn = document.getElementById("sendBtn");
 
-// speech recognition setup
-if ('webkitSpeechRecognition' in window) {
+// Initialize speech recognition
+if ("webkitSpeechRecognition" in window) {
   recognition = new webkitSpeechRecognition();
-} else if ('SpeechRecognition' in window) {
+} else if ("SpeechRecognition" in window) {
   recognition = new SpeechRecognition();
 }
 
 if (recognition) {
+  recognition.lang = "en-US";
   recognition.continuous = false;
   recognition.interimResults = false;
-  recognition.lang = 'en-US';
 
   recognition.onresult = async (event) => {
     const transcript = event.results[0][0].transcript;
     await handleQuestion(transcript);
   };
 
-  recognition.onerror = (event) => {
-    statusEl.textContent = "Error: " + event.error;
-  };
-
   recognition.onend = () => {
-    if (isListening) recognition.start();
+    if (isListening) recognition.start(); // auto restart mic
   };
 }
 
-// dynamic response generator
-async function generateText(prompt) {
-  const lower = prompt.toLowerCase();
-
-  if (lower.includes("time")) {
-    return "The current time is " + new Date().toLocaleTimeString();
-  }
-
-  if (lower.includes("date") || lower.includes("day")) {
-    return "Today is " + new Date().toDateString();
-  }
-
-  if (lower.match(/\d+ [\+\-\*\/] \d+/)) {
-    try {
-      const result = eval(lower);
-      return "The answer is " + result;
-    } catch {
-      return "Sorry, I couldn't calculate that.";
-    }
-  }
-
-  if (lower.includes("weather")) {
-    return "I can’t check live weather yet, but I can be connected to an API.";
-  }
-
-  return "That's interesting! Could you ask me something else?";
-}
-
-// process question
 async function handleQuestion(input) {
   questionText.textContent = input;
-  questionEl.style.display = 'block';
-  answerEl.style.display = 'none';
-  loadingEl.style.display = 'flex';
-  statusEl.textContent = "Generating answer...";
+  questionEl.style.display = "block";
+  answerEl.style.display = "none";
+  loadingEl.style.display = "flex";
+  statusEl.textContent = "Thinking...";
 
   try {
-    const response = await generateText(input);
-    answerText.textContent = response;
-    answerEl.style.display = 'block';
+    const response = await fetch("http://localhost:3000/api/ask", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question: input }),
+    });
+
+    const data = await response.json();
+    answerText.textContent = data.answer;
+    answerEl.style.display = "block";
     statusEl.textContent = "Ready";
 
     if (!isMuted) {
-      speak(response);
+      speak(data.answer);
     }
   } catch (err) {
     statusEl.textContent = "Error: " + err.message;
   } finally {
-    loadingEl.style.display = 'none';
+    loadingEl.style.display = "none";
   }
 }
 
-// speak with auto mic restart
 function speak(text) {
-  if (currentUtterance) {
-    synthesis.cancel();
-  }
+  if (currentUtterance) synthesis.cancel();
 
   currentUtterance = new SpeechSynthesisUtterance(text);
   currentUtterance.onend = () => {
     currentUtterance = null;
-    if (isListening) recognition.start(); // reopen mic
+    if (isListening) recognition.start();
   };
+
   synthesis.speak(currentUtterance);
 }
 
-// mic toggle
 micBtn.onclick = () => {
   if (isListening) {
     recognition.stop();
@@ -123,14 +93,12 @@ micBtn.onclick = () => {
   muteBtn.style.display = "inline-block";
 };
 
-// mute toggle
 muteBtn.onclick = () => {
   isMuted = !isMuted;
   muteBtn.textContent = isMuted ? "🔈 Unmute" : "🔇 Mute";
   if (currentUtterance) synthesis.cancel();
 };
 
-// text input handler
 sendBtn.onclick = () => {
   const val = textInput.value.trim();
   if (val) {
