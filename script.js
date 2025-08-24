@@ -1,37 +1,75 @@
+let isListening = false;
+let isMuted = false;
+let recognition;
+let synthesis = window.speechSynthesis;
+let currentUtterance = null;
+
+const micBtn = document.getElementById('micBtn');
+const muteBtn = document.getElementById('muteBtn');
+const statusEl = document.getElementById('statusEl');
+const questionEl = document.getElementById('questionEl');
+const answerEl = document.getElementById('answerEl');
+const loadingEl = document.getElementById('loadingEl');
+const questionText = document.getElementById('questionText');
+const answerText = document.getElementById('answerText');
+const textInput = document.getElementById('textInput');
+const sendBtn = document.getElementById('sendBtn');
+
+// speech recognition setup
+if ('webkitSpeechRecognition' in window) {
+  recognition = new webkitSpeechRecognition();
+} else if ('SpeechRecognition' in window) {
+  recognition = new SpeechRecognition();
+}
+
+if (recognition) {
+  recognition.continuous = false;
+  recognition.interimResults = false;
+  recognition.lang = 'en-US';
+
+  recognition.onresult = async (event) => {
+    const transcript = event.results[0][0].transcript;
+    await handleQuestion(transcript);
+  };
+
+  recognition.onerror = (event) => {
+    statusEl.textContent = "Error: " + event.error;
+  };
+
+  recognition.onend = () => {
+    if (isListening) recognition.start();
+  };
+}
+
 // dynamic response generator
 async function generateText(prompt) {
   const lower = prompt.toLowerCase();
 
-  // Time
   if (lower.includes("time")) {
     return "The current time is " + new Date().toLocaleTimeString();
   }
 
-  // Date
   if (lower.includes("date") || lower.includes("day")) {
     return "Today is " + new Date().toDateString();
   }
 
-  // Math (basic)
   if (lower.match(/\d+ [\+\-\*\/] \d+/)) {
     try {
-      const result = eval(lower); // ⚠️ simple demo only
+      const result = eval(lower);
       return "The answer is " + result;
     } catch {
       return "Sorry, I couldn't calculate that.";
     }
   }
 
-  // Weather placeholder
   if (lower.includes("weather")) {
-    return "I can’t check live weather yet, but you can add an API like OpenWeather.";
+    return "I can’t check live weather yet, but I can be connected to an API.";
   }
 
-  // Default
-  return "That’s interesting! Could you ask me something else?";
+  return "That's interesting! Could you ask me something else?";
 }
 
-// process question (from mic or text input)
+// process question
 async function handleQuestion(input) {
   questionText.textContent = input;
   questionEl.style.display = 'block';
@@ -55,34 +93,48 @@ async function handleQuestion(input) {
   }
 }
 
-// modify speak so mic auto reopens after AI finishes
+// speak with auto mic restart
 function speak(text) {
   if (currentUtterance) {
     synthesis.cancel();
   }
+
   currentUtterance = new SpeechSynthesisUtterance(text);
   currentUtterance.onend = () => {
     currentUtterance = null;
-    if (!isListening) {  // restart mic after speaking
-      toggleListening();
-    }
+    if (isListening) recognition.start(); // reopen mic
   };
   synthesis.speak(currentUtterance);
 }
 
-// mic result handler
-if (recognition) {
-  recognition.onresult = async (event) => {
-    const transcript = event.results[0][0].transcript;
-    await handleQuestion(transcript);
-  };
-}
+// mic toggle
+micBtn.onclick = () => {
+  if (isListening) {
+    recognition.stop();
+    micBtn.textContent = "🎤 Start Listening";
+    micBtn.style.background = "#007AFF";
+    isListening = false;
+  } else {
+    recognition.start();
+    micBtn.textContent = "⏹️ Stop Listening";
+    micBtn.style.background = "#d32f2f";
+    isListening = true;
+  }
+  muteBtn.style.display = "inline-block";
+};
+
+// mute toggle
+muteBtn.onclick = () => {
+  isMuted = !isMuted;
+  muteBtn.textContent = isMuted ? "🔈 Unmute" : "🔇 Mute";
+  if (currentUtterance) synthesis.cancel();
+};
 
 // text input handler
-document.getElementById("sendBtn").onclick = () => {
-  const val = document.getElementById("textInput").value.trim();
+sendBtn.onclick = () => {
+  const val = textInput.value.trim();
   if (val) {
     handleQuestion(val);
-    document.getElementById("textInput").value = "";
+    textInput.value = "";
   }
 };
